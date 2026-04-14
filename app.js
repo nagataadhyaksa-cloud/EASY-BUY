@@ -95,7 +95,20 @@ function closeModal() {
 }
 
 function renderProducts() {
-  productGrid.innerHTML = '<p>Produk akan muncul di sini</p>';
+  productGrid.innerHTML = products
+    .map(
+      (product) => `
+        <div class="product-card" data-id="${product.id}">
+          <img src="${product.image}" alt="${product.name}" />
+          <div class="product-details">
+            <h3 class="product-name">${product.name}</h3>
+            <p class="product-price">${formatPrice(product.price)}</p>
+            <button class="add-to-cart-button" data-id="${product.id}">Tambah ke Keranjang</button>
+          </div>
+        </div>
+      `
+    )
+    .join('');
 }
 
 function renderCart() {
