@@ -1,1 +1,78 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EASY BUY</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="brand">EASY BUY</div>
+      <button id="cartButton" class="cart-button">
+        Keranjang <span id="cartCount">0</span>
+      </button>
+    </header>
 
+    <main class="main-content">
+      <section class="hero">
+        <h1>Selamat datang di EASY BUY</h1>
+        <p>Jelajahi produk, tambahkan ke keranjang, dan tinjau pesanan Anda secara instan.</p>
+      </section>
+
+      <section class="product-grid" id="productGrid"></section>
+    </main>
+
+    <aside class="cart-drawer" id="cartDrawer">
+      <div class="cart-header">
+        <h2>Keranjang Anda</h2>
+        <button id="closeCart" class="close-button">×</button>
+      </div>
+      <div class="cart-items" id="cartItems"></div>
+      <div class="cart-footer">
+        <div class="cart-total">
+          <span>Total</span>
+          <strong id="cartTotal">Rp0</strong>
+        </div>
+        <button id="checkoutButton" class="checkout-button">Checkout</button>
+      </div>
+    </aside>
+
+    <div class="overlay hidden" id="overlay"></div>
+
+    <div class="product-modal hidden" id="productModal">
+      <div class="modal-content">
+        <button id="closeModal" class="close-button">×</button>
+        <img id="modalImage" src="" alt="" />
+        <h2 id="modalName"></h2>
+        <p id="modalDescription"></p>
+        <div class="modal-price" id="modalPrice"></div>
+        <button id="addToCartFromModal" class="add-to-cart-button">Tambah ke Keranjang</button>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+    <!-- Firebase SDK -->
+    <script type="module">
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+      import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+      // Firebase configuration (ganti dengan config Anda)
+      const firebaseConfig = {
+        apiKey: "AIzaSyCwEYqCo9r7o_CCN_L0Bsgo4Z0UwGt_F0E",
+        authDomain: "easybuy-97a52.firebaseapp.com",
+        projectId: "easybuy-97a52",
+        storageBucket: "easybuy-97a52.firebasestorage.app",
+        messagingSenderId: "254610292115",
+        appId: "1:254610292115:web:1a19dd8fef0701bc723c66",
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      // Make db available globally
+      window.db = db;
+    </script>
+  </body>
+</html>
