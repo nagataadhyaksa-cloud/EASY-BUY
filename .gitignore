@@ -1,0 +1,18 @@
+# Node.js
+node_modules/
+
+# Environment Variables
+.env
+
+# macOS
+.DS_Store
+
+# Log files
+logs/**
+*.log
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
