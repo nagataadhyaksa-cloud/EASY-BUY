@@ -2,7 +2,7 @@
 import { collection, getDocs } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
 
 let products = []; // Will be loaded from Backend/Firebase
-const BACKEND_URL = 'http://localhost:5000';
+const BACKEND_URL = 'https://your-railway-url.com'; // dari Railway
 
 const cart = [];
 const productGrid = document.getElementById('productGrid');
