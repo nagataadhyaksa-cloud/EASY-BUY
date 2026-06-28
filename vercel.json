@@ -1,7 +1,6 @@
 {
   "buildCommand": "echo 'Build complete'",
   "outputDirectory": ".",
-  "public": "frontend",
   "rewrites": [
     {
       "source": "/api/:path*",
@@ -9,7 +8,7 @@
     },
     {
       "source": "/((?!api).*)",
-      "destination": "/frontend/index.html"
+      "destination": "/index.html"
     }
   ]
 }
