@@ -1,35 +1,174 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <title>Registration Form</title>
-</head>
-<body>
-    <h2>Registration Form</h2>
-    <form action="#" method="post">
-        <label for="fullname">Full Name:</label>
-        <input type="text" id="fullname" name="fullname" required><br><br>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EASY BUY - Daftar</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      .auth-container {
+        max-width: 400px;
+        margin: 60px auto;
+        padding: 40px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
 
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required><br><br>
+      .auth-container h2 {
+        text-align: center;
+        margin-bottom: 30px;
+        color: var(--primary);
+      }
 
-        <label for="phone">Phone Number:</label>
-        <input type="tel" id="phone" name="phone" required><br><br>
+      .form-group {
+        margin-bottom: 20px;
+      }
 
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" minlength="8" required><br><br>
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--text);
+        font-weight: 500;
+      }
 
-        <label for="confirm_password">Confirm Password:</label>
-        <input type="password" id="confirm_password" name="confirm_password" minlength="8" required><br><br>
+      .form-group input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        box-sizing: border-box;
+        transition: border-color 0.3s;
+      }
 
-        <input type="checkbox" id="terms" name="terms" required>
-        <label for="terms">I agree to the Terms and Conditions</label><br><br>
+      .form-group input:focus {
+        outline: none;
+        border-color: var(--primary);
+      }
 
-        <input type="checkbox" id="newsletter" name="newsletter">
-        <label for="newsletter">Subscribe to Newsletter</label><br><br>
+      .auth-button {
+        width: 100%;
+        padding: 12px;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
 
-        <input type="submit" value="Register">
-    </form>
+      .auth-button:hover {
+        background: var(--primary-dark, #4a90e2);
+      }
 
-    <p>Already have an account? <a href="login.html">Login here</a></p>
-</body>
+      .auth-link {
+        text-align: center;
+        margin-top: 20px;
+        color: var(--muted);
+      }
+
+      .auth-link a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .error {
+        color: #e74c3c;
+        font-size: 14px;
+        margin-top: 5px;
+      }
+
+      .success {
+        color: #27ae60;
+        font-size: 14px;
+        margin-bottom: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="brand">EASY BUY</div>
+      <a href="index.html" style="color: var(--text); text-decoration: none; font-weight: 600;">← Kembali</a>
+    </header>
+
+    <div class="auth-container">
+      <h2>Daftar Akun Baru</h2>
+      <div id="message"></div>
+      <form id="registerForm">
+        <div class="form-group">
+          <label for="name">Nama Lengkap</label>
+          <input type="text" id="name" name="name" required placeholder="John Doe" />
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required placeholder="contoh@gmail.com" />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required placeholder="••••••••" />
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Konfirmasi Password</label>
+          <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="••••••••" />
+        </div>
+
+        <button type="submit" class="auth-button">Daftar</button>
+      </form>
+
+      <div class="auth-link">
+        Sudah punya akun? <a href="login.html">Login di sini</a>
+      </div>
+    </div>
+
+    <script>
+      const BACKEND_URL = 'http://localhost:5000';
+      const registerForm = document.getElementById('registerForm');
+      const messageDiv = document.getElementById('message');
+
+      registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        if (password !== confirmPassword) {
+          messageDiv.innerHTML = '<div class="error">❌ Password tidak cocok!</div>';
+          return;
+        }
+
+        try {
+          const response = await fetch(`${BACKEND_URL}/api/auth/register`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ name, email, password })
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || 'Registrasi gagal');
+          }
+
+          messageDiv.innerHTML = '<div class="success">✅ Registrasi berhasil! Redirect ke login...</div>';
+          setTimeout(() => {
+            window.location.href = 'login.html';
+          }, 1500);
+        } catch (error) {
+          messageDiv.innerHTML = `<div class="error">❌ ${error.message}</div>`;
+          console.error('Register error:', error);
+        }
+      });
+    </script>
+  </body>
 </html>
