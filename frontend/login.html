@@ -1,37 +1,161 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Page</title>
-    <link rel="stylesheet" href="/path/to/your/styles.css">
-</head>
-<body>
-    <div class="login-container">
-        <form action="/your-login-endpoint" method="POST">
-            <h2>Login</h2>
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <div class="form-group">
-                <input type="checkbox" id="remember-me" name="remember-me">
-                <label for="remember-me">Remember Me</label>
-            </div>
-            <div class="form-group">
-                <a href="/forgot-password" class="forgot-password">Forgot Password?</a>
-            </div>
-            <div class="form-group">
-                <button type="submit">Login</button>
-            </div>
-            <div class="form-group">
-                <p>Don't have an account? <a href="/signup">Sign Up</a></p>
-            </div>
-        </form>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EASY BUY - Login</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      .auth-container {
+        max-width: 400px;
+        margin: 60px auto;
+        padding: 40px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .auth-container h2 {
+        text-align: center;
+        margin-bottom: 30px;
+        color: var(--primary);
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--text);
+        font-weight: 500;
+      }
+
+      .form-group input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        box-sizing: border-box;
+        transition: border-color 0.3s;
+      }
+
+      .form-group input:focus {
+        outline: none;
+        border-color: var(--primary);
+      }
+
+      .auth-button {
+        width: 100%;
+        padding: 12px;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+
+      .auth-button:hover {
+        background: var(--primary-dark, #4a90e2);
+      }
+
+      .auth-link {
+        text-align: center;
+        margin-top: 20px;
+        color: var(--muted);
+      }
+
+      .auth-link a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .error {
+        color: #e74c3c;
+        font-size: 14px;
+        margin-top: 5px;
+      }
+
+      .success {
+        color: #27ae60;
+        font-size: 14px;
+        margin-bottom: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="brand">EASY BUY</div>
+      <a href="index.html" style="color: var(--text); text-decoration: none; font-weight: 600;">← Kembali</a>
+    </header>
+
+    <div class="auth-container">
+      <h2>Login</h2>
+      <div id="message"></div>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required placeholder="contoh@gmail.com" />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required placeholder="••••••••" />
+        </div>
+
+        <button type="submit" class="auth-button">Login</button>
+      </form>
+
+      <div class="auth-link">
+        Belum punya akun? <a href="register.html">Daftar di sini</a>
+      </div>
     </div>
-</body>
+
+    <script>
+      const BACKEND_URL = 'http://localhost:5000';
+      const loginForm = document.getElementById('loginForm');
+      const messageDiv = document.getElementById('message');
+
+      loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        try {
+          const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || 'Login gagal');
+          }
+
+          // Simpan token
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+
+          messageDiv.innerHTML = '<div class="success">✅ Login berhasil! Redirect...</div>';
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 1500);
+        } catch (error) {
+          messageDiv.innerHTML = `<div class="error">❌ ${error.message}</div>`;
+          console.error('Login error:', error);
+        }
+      });
+    </script>
+  </body>
 </html>

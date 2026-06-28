@@ -1,7 +1,8 @@
 // Import Firebase functions (sudah di HTML)
 import { collection, getDocs } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
 
-let products = []; // Will be loaded from Firebase
+let products = []; // Will be loaded from Backend/Firebase
+const BACKEND_URL = 'http://localhost:5000';
 
 const cart = [];
 const productGrid = document.getElementById('productGrid');
@@ -27,45 +28,68 @@ function formatPrice(value) {
 
 async function loadProducts() {
   try {
-    const querySnapshot = await getDocs(collection(window.db, 'products'));
-    products = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    console.log('Products loaded:', products);
+    // Coba ambil dari backend dahulu
+    console.log('📡 Mengambil produk dari backend...');
+    const response = await fetch(`${BACKEND_URL}/api/products`, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.ok) throw new Error(`Backend error: ${response.status}`);
+    
+    products = await response.json();
+    console.log('✅ Products loaded from backend:', products);
     renderProducts();
   } catch (error) {
-    console.error('Error loading products:', error);
-    // Fallback to static products if Firebase fails
-    products = [
-      {
-        id: '1',
-        name: 'Sepatu Sneakers Klasik',
-        description: 'Sepatu sehari-hari yang nyaman dengan desain bersih.',
-        price: 900000,
-        image: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=800&q=80',
-      },
-      {
-        id: '2',
-        name: 'Tas Punggung Minimalis',
-        description: 'Tas punggung modern untuk kerja, sekolah, dan perjalanan.',
-        price: 600000,
-        image: 'https://images.unsplash.com/photo-1519737593435-2f7f54b13f8d?auto=format&fit=crop&w=800&q=80',
-      },
-      {
-        id: '3',
-        name: 'Headphone Nirkabel',
-        description: 'Suara terisolasi dari kebisingan untuk fokus dan perjalanan.',
-        price: 1350000,
-        image: 'https://images.unsplash.com/photo-1517325232481-1c7b0a8c31a4?auto=format&fit=crop&w=800&q=80',
-      },
-      {
-        id: '4',
-        name: 'Mug Travel',
-        description: 'Membuat minuman tetap panas atau dingin saat bepergian.',
-        price: 300000,
-        image: 'https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=800&q=80',
-      },
-    ];
-    renderProducts();
+    console.warn('⚠️ Backend tidak tersedia, fallback ke Firebase...', error);
+    try {
+      // Fallback ke Firebase jika backend error
+      const querySnapshot = await getDocs(collection(window.db, 'products'));
+      products = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      console.log('✅ Products loaded from Firebase:', products);
+      renderProducts();
+    } catch (firebaseError) {
+      console.error('❌ Error loading from Firebase:', firebaseError);
+      // Fallback ke data statis
+      loadStaticProducts();
+    }
   }
+}
+
+function loadStaticProducts() {
+  console.log('📦 Menggunakan static products...');
+  products = [
+    {
+      id: '1',
+      name: 'Sepatu Sneakers Klasik',
+      description: 'Sepatu sehari-hari yang nyaman dengan desain bersih.',
+      price: 900000,
+      image: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=800&q=80',
+    },
+    {
+      id: '2',
+      name: 'Tas Punggung Minimalis',
+      description: 'Tas punggung modern untuk kerja, sekolah, dan perjalanan.',
+      price: 600000,
+      image: 'https://images.unsplash.com/photo-1519737593435-2f7f54b13f8d?auto=format&fit=crop&w=800&q=80',
+    },
+    {
+      id: '3',
+      name: 'Headphone Nirkabel',
+      description: 'Suara terisolasi dari kebisingan untuk fokus dan perjalanan.',
+      price: 1350000,
+      image: 'https://images.unsplash.com/photo-1517325232481-1c7b0a8c31a4?auto=format&fit=crop&w=800&q=80',
+    },
+    {
+      id: '4',
+      name: 'Mug Travel',
+      description: 'Membuat minuman tetap panas atau dingin saat bepergian.',
+      price: 300000,
+      image: 'https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=800&q=80',
+    },
+  ];
+  renderProducts();
 }
 
 function openModal(product) {
@@ -84,7 +108,7 @@ function openModal(product) {
   overlay.classList.remove('hidden');
 }
 
-function closeModal() {
+function closeModalFunc() {
   productModal.classList.remove('visible');
   overlay.classList.remove('visible');
   setTimeout(() => {
@@ -140,10 +164,13 @@ function renderCart() {
 }
 
 function addToCart(productId) {
-  const product = products.find((item) => item.id === productId);
-  if (!product) return;
+  const product = products.find((item) => item.id === productId || item.id === String(productId));
+  if (!product) {
+    console.warn('Produk tidak ditemukan:', productId);
+    return;
+  }
 
-  const existing = cart.find((item) => item.id === productId);
+  const existing = cart.find((item) => item.id === productId || item.id === String(productId));
   if (existing) {
     existing.quantity += 1;
   } else {
@@ -157,7 +184,7 @@ function addToCart(productId) {
 function openCart() {
   // Close modal if open
   if (productModal.classList.contains('visible')) {
-    closeModal();
+    closeModalFunc();
   }
   cartDrawer.classList.add('open');
   overlay.classList.add('visible');
@@ -177,14 +204,14 @@ function closeCartDrawer() {
 productGrid.addEventListener('click', (event) => {
   const button = event.target.closest('button[data-id]');
   if (button) {
-    addToCart(Number(button.dataset.id));
+    addToCart(button.dataset.id);
     return;
   }
 
   const card = event.target.closest('.product-card[data-id]');
   if (card) {
-    const productId = Number(card.dataset.id);
-    const product = products.find((item) => item.id === productId);
+    const productId = card.dataset.id;
+    const product = products.find((item) => item.id === productId || item.id === String(productId));
     if (product) {
       openModal(product);
     }
@@ -195,23 +222,61 @@ cartButton.addEventListener('click', openCart);
 closeCart.addEventListener('click', closeCartDrawer);
 overlay.addEventListener('click', () => {
   if (productModal.classList.contains('visible')) {
-    closeModal();
+    closeModalFunc();
   } else {
     closeCartDrawer();
   }
 });
-closeModal.addEventListener('click', closeModal);
+closeModal.addEventListener('click', closeModalFunc);
 addToCartFromModal.addEventListener('click', () => {
-  const productId = Number(addToCartFromModal.dataset.id);
+  const productId = addToCartFromModal.dataset.id;
   addToCart(productId);
-  closeModal();
+  closeModalFunc();
 });
-checkoutButton.addEventListener('click', () => {
-  if (cart.length === 0) return;
-  alert('Terima kasih telah mencoba demo checkout!');
-  cart.length = 0;
-  renderCart();
-  closeCartDrawer();
+
+checkoutButton.addEventListener('click', async () => {
+  if (cart.length === 0) {
+    alert('Keranjang kosong!');
+    return;
+  }
+
+  const token = localStorage.getItem('token');
+  if (!token) {
+    alert('⚠️ Silakan login terlebih dahulu!');
+    window.location.href = '/frontend/login.html';
+    return;
+  }
+
+  try {
+    const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const response = await fetch(`${BACKEND_URL}/api/orders`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        items: cart,
+        total: total,
+        createdAt: new Date()
+      })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Checkout gagal');
+    }
+    
+    const result = await response.json();
+    alert('✅ Pesanan berhasil dibuat!');
+    console.log('Order created:', result);
+    cart.length = 0;
+    renderCart();
+    closeCartDrawer();
+  } catch (error) {
+    alert('❌ Terjadi kesalahan: ' + error.message);
+    console.error('Checkout error:', error);
+  }
 });
 
 loadProducts();
