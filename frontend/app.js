@@ -1,8 +1,6 @@
-// Import Firebase functions (sudah di HTML)
-import { collection, getDocs } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
-
-let products = []; // Will be loaded from Backend/Firebase
-const BACKEND_URL = 'https://your-railway-url.com'; // dari Railway
+// Gunakan path relative karena backend di Vercel (same domain)
+let products = []; // Will be loaded from Backend
+const BACKEND_URL = ''; // Kosong = use same domain
 
 const cart = [];
 const productGrid = document.getElementById('productGrid');
@@ -30,7 +28,7 @@ async function loadProducts() {
   try {
     // Coba ambil dari backend dahulu
     console.log('📡 Mengambil produk dari backend...');
-    const response = await fetch(`${BACKEND_URL}/api/products`, {
+    const response = await fetch('/api/products', {
       headers: {
         'Content-Type': 'application/json'
       }
@@ -42,18 +40,8 @@ async function loadProducts() {
     console.log('✅ Products loaded from backend:', products);
     renderProducts();
   } catch (error) {
-    console.warn('⚠️ Backend tidak tersedia, fallback ke Firebase...', error);
-    try {
-      // Fallback ke Firebase jika backend error
-      const querySnapshot = await getDocs(collection(window.db, 'products'));
-      products = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      console.log('✅ Products loaded from Firebase:', products);
-      renderProducts();
-    } catch (firebaseError) {
-      console.error('❌ Error loading from Firebase:', firebaseError);
-      // Fallback ke data statis
-      loadStaticProducts();
-    }
+    console.warn('⚠️ Backend tidak tersedia, fallback ke static data...', error);
+    loadStaticProducts();
   }
 }
 
@@ -249,7 +237,7 @@ checkoutButton.addEventListener('click', async () => {
 
   try {
     const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const response = await fetch(`${BACKEND_URL}/api/orders`, {
+    const response = await fetch('/api/orders', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
