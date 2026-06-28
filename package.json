@@ -1,0 +1,11 @@
+{
+  "name": "easy-buy",
+  "version": "1.0.0",
+  "description": "EASY BUY E-commerce",
+  "type": "module",
+  "dependencies": {
+    "mongodb": "^5.0.0",
+    "jsonwebtoken": "^9.0.0",
+    "bcryptjs": "^2.4.3"
+  }
+}
